@@ -1560,7 +1560,7 @@ enable_service() {
         systemctl enable "${1}" &> /dev/null
     # if openrc exists,
     elif is_command rc-update ; then
-        rc-update add "${1}" default &> /dev/null || true
+        rc-update add "${1}" &> /dev/null || true
     else
         #  Otherwise, use update-rc.d to accomplish this
         update-rc.d "${1}" defaults &> /dev/null
