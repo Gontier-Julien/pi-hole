@@ -2257,9 +2257,9 @@ FTLinstall() {
         # If we downloaded binary file (as opposed to text),
         if
             if is_command apk ; then
-                sha1sum -s -c "${binary}".sha1;
+                sha1sum -s -c "${binary}".sha1; then
             else
-                sha1sum --status --quiet -c "${binary}".sha1;
+                sha1sum --status --quiet -c "${binary}".sha1; then
             fi
             printf "transferred... "
 
