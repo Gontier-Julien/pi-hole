@@ -381,6 +381,20 @@ package_manager_detect() {
             fi
         fi
 
+    # If apt-get nor rpm is not found, check for apk.
+    elif is_command apk ; then
+            PKG_MANAGER="apk"
+
+        # These variable names match the ones for apt-get. See above for an explanation of what they are for.
+        PKG_INSTALL=("${PKG_MANAGER}" --no-cache add)
+        OS_CHECK_DEPS=(grep bind-tools)
+        INSTALLER_DEPS=(git dialog iproute2 newt procps ca-certificates)
+        PIHOLE_DEPS=(cronie curl findutils sudo unzip libidn2 psmisc libcap nmap-ncat jq)
+        PIHOLE_WEB_DEPS=(lighttpd php*-common php*-cli php*-pdo php*-xml php*-json php*-intl)
+        LIGHTTPD_USER="lighttpd"
+        LIGHTTPD_GROUP="lighttpd"
+        LIGHTTPD_CFG="lighttpd.conf.debian"
+
     # If neither apt-get or yum/dnf package managers were found
     else
         # we cannot install required packages
