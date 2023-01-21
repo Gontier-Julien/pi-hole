@@ -1520,6 +1520,9 @@ stop_service() {
     printf "  %b %s..." "${INFO}" "${str}"
     if is_command systemctl ; then
         systemctl stop "${1}" &> /dev/null || true
+    # if openrc exists,
+    elif is_command rc-service ; then
+        rc-service "${1}" stop &> /dev/null || true
     else
         service "${1}" stop &> /dev/null || true
     fi
@@ -1535,6 +1538,9 @@ restart_service() {
     if is_command systemctl ; then
         # use that to restart the service
         systemctl restart "${1}" &> /dev/null
+    # if openrc exists,
+    elif is_command rc-service ; then
+        rc-service "${1}" restart &> /dev/null || true
     else
         # Otherwise, fall back to the service command
         service "${1}" restart &> /dev/null
@@ -1551,6 +1557,9 @@ enable_service() {
     if is_command systemctl ; then
         # use that to enable the service
         systemctl enable "${1}" &> /dev/null
+    # if openrc exists,
+    elif is_command rc-service ; then
+        rc-update add "${1}" default &> /dev/null || true
     else
         #  Otherwise, use update-rc.d to accomplish this
         update-rc.d "${1}" defaults &> /dev/null
@@ -1567,6 +1576,9 @@ disable_service() {
     if is_command systemctl ; then
         # use that to disable the service
         systemctl disable "${1}" &> /dev/null
+    # if openrc exists,
+    elif is_command rc-service ; then
+        rc-update del "${1}" default &> /dev/null || true
     else
         # Otherwise, use update-rc.d to accomplish this
         update-rc.d "${1}" disable &> /dev/null
@@ -1579,6 +1591,9 @@ check_service_active() {
     if is_command systemctl ; then
         # use that to check the status of the service
         systemctl is-enabled "${1}" &> /dev/null
+    # if openrc exists,
+    elif is_command rc-update ; then
+        rc-update -a show | grep -sEe "\s*${1} .*" &> /dev/null
     else
         # Otherwise, fall back to service command
         service "${1}" status &> /dev/null
