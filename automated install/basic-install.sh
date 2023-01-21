@@ -2237,7 +2237,7 @@ FTLinstall() {
     fi
 
     local binary
-    binary="musl${1}"
+    binary="${1}"
 
     # Determine which version of FTL to download
     if [[ "${ftlBranch}" == "master" ]];then
