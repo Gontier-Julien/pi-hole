@@ -2237,11 +2237,7 @@ FTLinstall() {
     fi
 
     local binary
-    if is_command apk ; then
-        binary="musl${1}"
-    else
-        binary="${1}"
-    fi
+    binary="musl${1}"
 
     # Determine which version of FTL to download
     if [[ "${ftlBranch}" == "master" ]];then
