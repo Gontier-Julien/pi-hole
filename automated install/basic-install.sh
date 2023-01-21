@@ -138,6 +138,13 @@ else
     OVER="\\r\\033[K"
 fi
 
+# Check the init system
+if command -v systemctl >/dev/null 2>&1; then
+  INIT_SYSTEM='systemd'
+elif command -v rc-service >/dev/null 2>&1; then
+  INIT_SYSTEM='openrc'
+fi
+
 # A simple function that just echoes out our logo in ASCII format
 # This lets users know that it is a Pi-hole, LLC product
 show_ascii_berry() {
@@ -1515,90 +1522,93 @@ install_manpage() {
 }
 
 stop_service() {
-    # Stop service passed in as argument.
-    # Can softfail, as process may not be installed when this is called
-    local str="Stopping ${1} service"
-    printf "  %b %s..." "${INFO}" "${str}"
-    if is_command systemctl ; then
-        systemctl stop "${1}" &> /dev/null || true
-    # if openrc exists,
-    elif is_command rc-service ; then
-        rc-service "${1}" stop &> /dev/null || true
-    else
-        service "${1}" stop &> /dev/null || true
-    fi
-    printf "%b  %b %s...\\n" "${OVER}" "${TICK}" "${str}"
+  # Stop service passed in as argument.
+  # Can softfail, as process may not be installed when this is called
+  local str="Stopping ${1} service"
+  printf "  %b %s..." "${INFO}" "${str}"
+  case "${INIT_SYSTEM}" in
+    systemd)
+      systemctl stop "${1}" &> /dev/null || true
+      ;;
+    openrc)
+      rc-service "${1}" stop &> /dev/null || true
+       ;;
+     *)
+      service "${1}" stop &> /dev/null || true
+      ;;
+  esac
+  printf "%b  %b %s...\\n" "${OVER}" "${TICK}" "${str}"
 }
 
 # Start/Restart service passed in as argument
 restart_service() {
-    # Local, named variables
-    local str="Restarting ${1} service"
-    printf "  %b %s..." "${INFO}" "${str}"
-    # If systemctl exists,
-    if is_command systemctl ; then
-        # use that to restart the service
-        systemctl restart "${1}" &> /dev/null
-    # if openrc exists,
-    elif is_command rc-service ; then
-        rc-service "${1}" restart &> /dev/null || true
-    else
-        # Otherwise, fall back to the service command
-        service "${1}" restart &> /dev/null
-    fi
-    printf "%b  %b %s...\\n" "${OVER}" "${TICK}" "${str}"
+  # Local, named variables
+  local str="Restarting ${1} service"
+  printf "  %b %s..." "${INFO}" "${str}"
+  case "${INIT_SYSTEM}" in
+    systemd)
+      systemctl restart "${1}" &> /dev/null || true
+      ;;
+    openrc)
+      rc-service "${1}" restart &> /dev/null || true
+       ;;
+     *)
+      service "${1}" restart &> /dev/null || true
+      ;;
+  esac
+  printf "%b  %b %s...\\n" "${OVER}" "${TICK}" "${str}"
 }
 
 # Enable service so that it will start with next reboot
 enable_service() {
-    # Local, named variables
-    local str="Enabling ${1} service to start on reboot"
-    printf "  %b %s..." "${INFO}" "${str}"
-    # If systemctl exists,
-    if is_command systemctl ; then
-        # use that to enable the service
-        systemctl enable "${1}" &> /dev/null
-    # if openrc exists,
-    elif is_command rc-update ; then
-        rc-update add "${1}" &> /dev/null || true
-    else
-        #  Otherwise, use update-rc.d to accomplish this
-        update-rc.d "${1}" defaults &> /dev/null
-    fi
-    printf "%b  %b %s...\\n" "${OVER}" "${TICK}" "${str}"
+  # Local, named variables
+  local str="Enabling ${1} service to start on reboot"
+  printf "  %b %s..." "${INFO}" "${str}"
+  case "${INIT_SYSTEM}" in
+    systemd)
+      systemctl enable "${1}" &> /dev/null || true
+      ;;
+    openrc)
+      rc-update add "${1}" default &> /dev/null || true
+       ;;
+     *)
+      update-rc.d "${1}" defaults &> /dev/null || true
+      ;;
+  esac
+  printf "%b  %b %s...\\n" "${OVER}" "${TICK}" "${str}"
 }
 
 # Disable service so that it will not with next reboot
 disable_service() {
-    # Local, named variables
-    local str="Disabling ${1} service"
-    printf "  %b %s..." "${INFO}" "${str}"
-    # If systemctl exists,
-    if is_command systemctl ; then
-        # use that to disable the service
-        systemctl disable "${1}" &> /dev/null
-    # if openrc exists,
-    elif is_command rc-update ; then
-        rc-update del "${1}" default &> /dev/null || true
-    else
-        # Otherwise, use update-rc.d to accomplish this
-        update-rc.d "${1}" disable &> /dev/null
-    fi
-    printf "%b  %b %s...\\n" "${OVER}" "${TICK}" "${str}"
+  # Local, named variables
+  local str="Disabling ${1} service"
+  printf "  %b %s..." "${INFO}" "${str}"
+  case "${INIT_SYSTEM}" in
+  systemd)
+    systemctl disable "${1}" &> /dev/null
+    ;;
+  openrc)
+    rc-update del "${1}" default &> /dev/null
+    ;;
+  *)
+    update-rc.d "${1}" disable &> /dev/null
+    ;;
+  esac
+  printf "%b  %b %s...\\n" "${OVER}" "${TICK}" "${str}"
 }
 
 check_service_active() {
-    # If systemctl exists,
-    if is_command systemctl ; then
-        # use that to check the status of the service
-        systemctl is-enabled "${1}" &> /dev/null
-    # if openrc exists,
-    elif is_command rc-update ; then
-        rc-update -a show | grep -sEe "\s*${1} .*" &> /dev/null
-    else
-        # Otherwise, fall back to service command
-        service "${1}" status &> /dev/null
-    fi
+  case "${INIT_SYSTEM}" in
+  systemd)
+    systemctl is-enabled "${1}" &> /dev/null
+    ;;
+  openrc)
+    rc-update -a show | grep -sEe "\s*${1} .*" &> /dev/null
+    ;;
+  *)
+    service "${1}" status &> /dev/null
+    ;;
+  esac
 }
 
 # Systemd-resolved's DNSStubListener and dnsmasq can't share port 53.
