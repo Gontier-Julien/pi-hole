@@ -2237,7 +2237,7 @@ FTLinstall() {
     fi
 
     local binary
-    binary="${1}"
+    binary="pihole-FTL-musl-linux-x86_64 "
 
     # Determine which version of FTL to download
     if [[ "${ftlBranch}" == "master" ]];then
@@ -2251,7 +2251,7 @@ FTLinstall() {
         curl -sSL --fail "${url}/${binary}.sha1" -o "${binary}.sha1"
 
         # If we downloaded binary file (as opposed to text),
-        if sha1sum -s -c "${binary}".sha1; then
+        if sha1sum --status --quiet -c "${binary}".sha1; then
             printf "transferred... "
 
             # Before stopping FTL, we download the macvendor database
