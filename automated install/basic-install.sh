@@ -1540,7 +1540,7 @@ restart_service() {
         systemctl restart "${1}" &> /dev/null
     # if openrc exists,
     elif is_command rc-service ; then
-        rc-service "${1}" restart &> /dev/null || true
+        rc-service "${1}" restart &> /dev/null
     else
         # Otherwise, fall back to the service command
         service "${1}" restart &> /dev/null
@@ -1559,7 +1559,7 @@ enable_service() {
         systemctl enable "${1}" &> /dev/null
     # if openrc exists,
     elif is_command rc-service ; then
-        rc-update add "${1}" default &> /dev/null || true
+        rc-update add "${1}" default &> /dev/null
     else
         #  Otherwise, use update-rc.d to accomplish this
         update-rc.d "${1}" defaults &> /dev/null
@@ -1578,7 +1578,7 @@ disable_service() {
         systemctl disable "${1}" &> /dev/null
     # if openrc exists,
     elif is_command rc-service ; then
-        rc-update del "${1}" default &> /dev/null || true
+        rc-update del "${1}" default &> /dev/null
     else
         # Otherwise, use update-rc.d to accomplish this
         update-rc.d "${1}" disable &> /dev/null
