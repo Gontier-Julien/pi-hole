@@ -2237,7 +2237,7 @@ FTLinstall() {
     fi
 
     local binary
-    binary="pihole-FTL-musl-linux-x86_64 "
+    binary="pihole-FTL-musl-linux-x86_64"
 
     # Determine which version of FTL to download
     if [[ "${ftlBranch}" == "master" ]];then
