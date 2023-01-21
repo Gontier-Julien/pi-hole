@@ -387,6 +387,7 @@ package_manager_detect() {
 
         # These variable names match the ones for apt-get. See above for an explanation of what they are for.
         PKG_INSTALL=("${PKG_MANAGER}" --no-cache add)
+        PKG_COUNT="${PKG_MANAGER} list -u | wc -l || true"
         OS_CHECK_DEPS=(grep bind-tools)
         INSTALLER_DEPS=(git dialog iproute2 newt procps ca-certificates)
         PIHOLE_DEPS=(cronie curl findutils sudo unzip libidn2 psmisc libcap nmap-ncat jq)
@@ -1540,7 +1541,7 @@ restart_service() {
         systemctl restart "${1}" &> /dev/null
     # if openrc exists,
     elif is_command rc-service ; then
-        rc-service "${1}" restart &> /dev/null
+        rc-service "${1}" restart &> /dev/null || true
     else
         # Otherwise, fall back to the service command
         service "${1}" restart &> /dev/null
@@ -1559,7 +1560,7 @@ enable_service() {
         systemctl enable "${1}" &> /dev/null
     # if openrc exists,
     elif is_command rc-service ; then
-        rc-update add "${1}" default &> /dev/null
+        rc-update add "${1}" default &> /dev/null || true
     else
         #  Otherwise, use update-rc.d to accomplish this
         update-rc.d "${1}" defaults &> /dev/null
@@ -1578,7 +1579,7 @@ disable_service() {
         systemctl disable "${1}" &> /dev/null
     # if openrc exists,
     elif is_command rc-service ; then
-        rc-update del "${1}" default &> /dev/null
+        rc-update del "${1}" default &> /dev/null || true
     else
         # Otherwise, use update-rc.d to accomplish this
         update-rc.d "${1}" disable &> /dev/null
