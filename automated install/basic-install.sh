@@ -2251,7 +2251,7 @@ FTLinstall() {
         curl -sSL --fail "${url}/${binary}.sha1" -o "${binary}.sha1"
 
         # If we downloaded binary file (as opposed to text),
-        if sha1sum --status --quiet -c "${binary}".sha1; then
+        if sha1sum -s -c "${binary}".sha1; then
             printf "transferred... "
 
             # Before stopping FTL, we download the macvendor database
@@ -2364,11 +2364,7 @@ get_binary_name() {
     elif [[ "${machine}" == "x86_64" ]]; then
         # This gives the processor of packages dpkg installs (for example, "i386")
         local dpkgarch
-        if is_command apk ; then
-            dpkgarch=$(cat /etc/apk/arch 2> /dev/null)
-        else
             dpkgarch=$(dpkg --print-processor 2> /dev/null || dpkg --print-architecture 2> /dev/null)
-        fi
 
         # Special case: This is a 32 bit OS, installed on a 64 bit machine
         # -> change machine processor to download the 32 bit executable
