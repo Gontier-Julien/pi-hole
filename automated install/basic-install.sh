@@ -1559,7 +1559,7 @@ enable_service() {
         # use that to enable the service
         systemctl enable "${1}" &> /dev/null
     # if openrc exists,
-    elif is_command rc-service ; then
+    elif is_command rc-update ; then
         rc-update add "${1}" default &> /dev/null || true
     else
         #  Otherwise, use update-rc.d to accomplish this
@@ -1578,7 +1578,7 @@ disable_service() {
         # use that to disable the service
         systemctl disable "${1}" &> /dev/null
     # if openrc exists,
-    elif is_command rc-service ; then
+    elif is_command rc-update ; then
         rc-update del "${1}" default &> /dev/null || true
     else
         # Otherwise, use update-rc.d to accomplish this
