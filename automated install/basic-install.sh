@@ -2238,7 +2238,7 @@ FTLinstall() {
 
     local binary
     if is_command apk ; then
-        binary="${musl-1}"
+        binary="${1}"
     else
         binary="${1}"
     fi
